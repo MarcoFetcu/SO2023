@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
             char *path = NULL;
             int rec = 0;
             int size_bool = 0;
-            int perm_bool = 0;
+           // int perm_bool = 0;
             char *size_smaller = NULL;
             char *has_perm_execute = NULL;
             for (int i = 2; i < argc; i++) {
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
                     strcpy(size_smaller, argv[i] + 13);
                     //printf("%s\n", size_smaller);
                 } else if (strncmp(argv[i], "has_perm_execute=", 17) == 0) {
-                    perm_bool = 1;
+                   // perm_bool = 1;
                     has_perm_execute = (char *) malloc(strlen(argv[i] + 17) + 1);
                     strcpy(has_perm_execute, argv[i] + 17);
                     printf("%s\n", has_perm_execute);
