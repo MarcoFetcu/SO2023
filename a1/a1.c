@@ -31,7 +31,7 @@ void simple_list(char *path, int rec) {
     closedir(dir);
 }
 
-void size_list(char *path, char *size){
+void size_list(char *path, char *size, int rec){
     DIR *dir = NULL;
     struct dirent *entry = NULL;
     char fullPath[512];
@@ -64,6 +64,8 @@ void size_list(char *path, char *size){
                         printf("%s\n",fullPath);
                     }
                     close(fd);
+                }else if(S_ISDIR(statbuf.st_mode) && rec == 1){
+                    size_list(fullPath,size,rec);
                 }
             }
         }
@@ -115,7 +117,7 @@ int main(int argc, char **argv) {
                 if (size_bool == 0 && size_smaller == 0) {
                     simple_list(path, rec);
                 }else if(size_bool == 1){
-                    size_list(path, size_smaller);
+                    size_list(path, size_smaller, rec);
                 }
             }
             free(path);
