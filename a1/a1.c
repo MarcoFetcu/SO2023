@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 void simple_list(char *path, int rec) {
     DIR *dir = NULL;
@@ -29,6 +31,45 @@ void simple_list(char *path, int rec) {
     closedir(dir);
 }
 
+void size_list(char *path, char *size){
+    DIR *dir = NULL;
+    struct dirent *entry = NULL;
+    char fullPath[512];
+    struct stat statbuf;
+
+    dir = opendir(path);
+    if (dir == NULL) {
+        perror("Could not open directory");
+        return;
+    }
+
+    int size_int = atoi(size);
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+            snprintf(fullPath, 512, "%s/%s", path, entry->d_name);
+            if (lstat(fullPath, &statbuf) == 0) {
+                //printf("%s\n", fullPath);
+                if (S_ISREG(statbuf.st_mode)) {
+                    int fd;
+                    off_t size_fisier;
+                    fd = open(fullPath, O_RDONLY);
+                    if(fd == -1) {
+                        perror("Could not open input file");
+                        return;
+                    }
+                    size_fisier = lseek(fd, 0, SEEK_END);
+                    //printf("%d\n", size_fisier);
+                    if(size_fisier < size_int){
+                        printf("%s\n",fullPath);
+                    }
+                    close(fd);
+                }
+            }
+        }
+    }
+    closedir(dir);
+}
 int main(int argc, char **argv) {
     if (argc >= 2) {
         if (strcmp(argv[1], "variant") == 0) {
@@ -47,7 +88,7 @@ int main(int argc, char **argv) {
                     size_bool = 1;
                     size_smaller = (char *) malloc(strlen(argv[i] + 13) + 1);
                     strcpy(size_smaller, argv[i] + 13);
-                    printf("%s\n", size_smaller);
+                    //printf("%s\n", size_smaller);
                 } else if (strncmp(argv[i], "has_perm_execute=", 17) == 0) {
                     perm_bool = 1;
                     has_perm_execute = (char *) malloc(strlen(argv[i] + 17) + 1);
@@ -73,8 +114,13 @@ int main(int argc, char **argv) {
                 closedir(dir);
                 if (size_bool == 0 && size_smaller == 0) {
                     simple_list(path, rec);
+                }else if(size_bool == 1){
+                    size_list(path, size_smaller);
                 }
             }
+            free(path);
+            free(size_smaller);
+            free(has_perm_execute);
         }
     }
     return 0;
