@@ -73,6 +73,15 @@ void *threadFn2(void *vid) {
     return NULL;
 }
 
+void *threadFn3(void *vid) {
+    int id = *(int *) vid;
+
+        info(BEGIN, 2, id);
+        info(END, 2, id);
+
+    return NULL;
+}
+
 int main() {
     init();
     pid_t pid2 = -1;
@@ -98,6 +107,17 @@ int main() {
         return -2;
     } else if (pid2 == 0) {
         info(BEGIN, 2, 0);
+        pthread_t tid2[48];
+        int id_tid2[48];
+
+
+        for (int i = 0; i < 48; i++) {
+            id_tid2[i] = i+1;
+            pthread_create(&tid2[i], NULL, threadFn3, &(id_tid2[i]));
+        }
+        for (int i = 0; i < 48; i++) {
+            pthread_join(tid2[i], 0);
+        }
         info(END, 2, 0);
 
         return 0;
